@@ -1,4 +1,3 @@
-
 CREATE DATABASE db_auth;
 
 CREATE TABLE IF NOT EXISTS `user` (

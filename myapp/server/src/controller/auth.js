@@ -7,7 +7,18 @@ exports.createAuthRouter = (db) => {
   router.get(
     "/login",
     asyncRoute(async (req, res) => {
-      res.json({ message: "auth login api" });
+      const id = req.body.id;
+      const pw = req.body.pw;
+
+      console.log(db);
+
+      const result = await db.execute(
+        `SELECT * FROM user WHERE user_id=? AND user_pw=?`,
+        [id, pw]
+      );
+      if (result) {
+        res.json({ message: JSON.stringify(result) });
+      }
 
       req.body.Account;
     })
@@ -22,11 +33,13 @@ exports.createAuthRouter = (db) => {
       console.log(db);
 
       const result = await db.execute(
-        `SELECT * FROM user WHERE user_id=? AND user_pw=?`,
+        `INSERT INTO user (id,user_id,user_pw) VALUES(NULL,? ,?)`,
         [id, pw]
       );
 
-      res.json({ message: JSON.stringify(result) });
+      if (result) {
+        res.json({ message: JSON.stringify(result) });
+      }
     })
   );
 

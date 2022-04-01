@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import Inputform from "./input";
 import axios from "axios";
-const { PORT } = require("../../server/src/const");
+const PORT = 5005;
 
 function App() {
   const [userInfo, setUserInfo] = useState({
@@ -15,9 +15,17 @@ function App() {
     setUserInfo({ id: Account.id, pw: Account.pw });
   };
 
+  const handleJoin = (Account) => {
+    axios
+      .post(`http://localhost:${PORT}/auth/join`, Account)
+      .then((response) => {
+        console.log(response.data);
+      });
+  };
+
   const handleSubmit = (Account) => {
     axios
-      .post(`http://localhost:${PORT}./auth/join`, Account)
+      .get(`http://localhost:${PORT}/auth/login`, Account)
       .then((response) => {
         console.log(response.data);
       });
@@ -25,7 +33,7 @@ function App() {
 
   return (
     <div className="App">
-      <Inputform onSubmit={Submit} />
+      <Inputform onSubmit={handleSubmit} Join={handleJoin} />
       <p>id: {userInfo.id}</p>
       <p>pw: {userInfo.pw}</p>
     </div>
