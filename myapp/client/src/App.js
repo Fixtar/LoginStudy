@@ -25,14 +25,16 @@ function App() {
 
   const handleSubmit = (Account) => {
     axios
-      .get(`http://localhost:${PORT}/auth/login`, Account)
+      .post(`http://localhost:${PORT}/auth/login`, Account)
       .then((response) => {
         console.log(response.data);
+        if (response.data) console.log("success");
       });
   };
 
   return (
     <div className="App">
+      {" "}
       <Inputform onSubmit={handleSubmit} Join={handleJoin} />
       <p>id: {userInfo.id}</p>
       <p>pw: {userInfo.pw}</p>

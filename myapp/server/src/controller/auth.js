@@ -4,7 +4,7 @@ const { asyncRoute } = require("../util");
 exports.createAuthRouter = (db) => {
   const router = Router();
 
-  router.get(
+  router.post(
     "/login",
     asyncRoute(async (req, res) => {
       const id = req.body.id;
@@ -13,14 +13,17 @@ exports.createAuthRouter = (db) => {
       console.log(db);
 
       const result = await db.execute(
-        `SELECT * FROM user WHERE user_id=? AND user_pw=?`,
-        [id, pw]
+        "SELECT * FROM user WHERE `user_id`=? AND `user_pw`=?",
+        [id, pw],
+        (err, result1) => {
+          console.log(result1);
+          res.json(JSON.stringify(result1));
+        }
       );
-      if (result) {
-        res.json({ message: JSON.stringify(result) });
-      }
 
-      req.body.Account;
+      if (result) {
+        res.json(JSON.stringify(result));
+      }
     })
   );
 
