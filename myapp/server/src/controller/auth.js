@@ -1,5 +1,12 @@
 const { Router } = require("express");
 const { asyncRoute } = require("../util");
+const bcrypt = require("bcrypt");
+const jwt = require("jsonwebtoken");
+
+const { privateKey } = require("../const");
+require("dotenv").config();
+
+const saltRounds = 10;
 
 exports.createAuthRouter = (db) => {
   const router = Router();
@@ -7,22 +14,36 @@ exports.createAuthRouter = (db) => {
   router.post(
     "/login",
     asyncRoute(async (req, res) => {
-      const id = req.body.id;
-      const pw = req.body.pw;
+      const receiveToken = req.headers.Auth;
 
-      console.log(db);
+      if (receiveToken) {
+        const decoded = jwt.verify(receiveToken, privateKey);
+        if (decoded) console.log("token login success");
+      } else {
+        const id = req.body.id;
+        const pw = req.body.pw;
 
-      const result = await db.execute(
-        "SELECT * FROM user WHERE `user_id`=? AND `user_pw`=?",
-        [id, pw],
-        (err, result1) => {
-          console.log(result1);
-          res.json(JSON.stringify(result1));
+        const [result, fields] = await db.execute(
+          "SELECT user_pw FROM user WHERE user_id=?",
+          [id]
+        );
+
+        if (result.length >= 1) {
+          if (bcrypt.compareSync(pw, result[0].user_pw)) {
+            console.log("success");
+            const payload = {
+              tokenId: id,
+              tokenPw: pw,
+            };
+            var token = jwt.sign(payload, process.env.privateKey, {
+              algorithm: "RS256",
+            });
+
+            res.json({ webtoken: token });
+          }
+        } else {
+          console.log("err");
         }
-      );
-
-      if (result) {
-        res.json(JSON.stringify(result));
       }
     })
   );
@@ -35,9 +56,11 @@ exports.createAuthRouter = (db) => {
 
       console.log(db);
 
+      const hash = bcrypt.hashSync(pw, saltRounds);
+
       const result = await db.execute(
         `INSERT INTO user (id,user_id,user_pw) VALUES(NULL,? ,?)`,
-        [id, pw]
+        [id, hash]
       );
 
       if (result) {

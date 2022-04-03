@@ -24,11 +24,20 @@ function App() {
   };
 
   const handleSubmit = (Account) => {
+    const webtoken = localStorage.getItem("webtoken");
+
     axios
-      .post(`http://localhost:${PORT}/auth/login`, Account)
+      .post(`http://localhost:${PORT}/auth/login`, Account, {
+        headers: {
+          Auth: webtoken,
+        },
+      })
       .then((response) => {
         console.log(response.data);
-        if (response.data) console.log("success");
+        if (response.webtoken) {
+          localStorage.setItem("webtoken", response.token);
+          console.log("success");
+        }
       });
   };
 
