@@ -11,6 +11,8 @@ function App() {
 
   useEffect(() => {}, []);
 
+  const webToken = localStorage.getItem("webToken");
+
   const Submit = (Account) => {
     setUserInfo({ id: Account.id, pw: Account.pw });
   };
@@ -24,19 +26,12 @@ function App() {
   };
 
   const handleSubmit = (Account) => {
-    const webtoken = localStorage.getItem("webtoken");
-
     axios
-      .post(`http://localhost:${PORT}/auth/login`, Account, {
-        headers: {
-          Auth: webtoken,
-        },
-      })
+      .post(`http://localhost:${PORT}/auth/login`, Account)
       .then((response) => {
-        console.log(response.data);
-        if (response.webtoken) {
-          localStorage.setItem("webtoken", response.token);
-          console.log("success");
+        if (response.data.accessToken) {
+          console.log(response.data.accessToken);
+          localStorage.setItem("webToken", response.data.accessToken);
         }
       });
   };

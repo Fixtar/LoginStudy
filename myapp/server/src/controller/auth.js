@@ -35,11 +35,9 @@ exports.createAuthRouter = (db) => {
               tokenId: id,
               tokenPw: pw,
             };
-            var token = jwt.sign(payload, process.env.privateKey, {
-              algorithm: "RS256",
-            });
-
-            res.json({ webtoken: token });
+            var token = jwt.sign(payload, process.env.privateKey);
+            console.log(token);
+            res.json({ accessToken: token });
           }
         } else {
           console.log("err");
