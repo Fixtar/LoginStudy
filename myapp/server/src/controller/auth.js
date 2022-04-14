@@ -4,9 +4,8 @@ const bcrypt = require("bcrypt");
 const jwt = require("jsonwebtoken");
 
 const { privateKey } = require("../const");
-require("dotenv").config();
 
-const saltRounds = 10;
+const SALT_ROUND = 10;
 
 exports.createAuthRouter = (db) => {
   const router = Router();
@@ -23,24 +22,26 @@ exports.createAuthRouter = (db) => {
         const id = req.body.id;
         const pw = req.body.pw;
 
-        const [result, fields] = await db.execute(
+        const [rows, fields] = await db.execute(
           "SELECT user_pw FROM user WHERE user_id=?",
           [id]
         );
 
-        if (result.length >= 1) {
-          if (bcrypt.compareSync(pw, result[0].user_pw)) {
-            console.log("success");
-            const payload = {
-              tokenId: id,
-              tokenPw: pw,
-            };
-            var token = jwt.sign(payload, process.env.privateKey);
-            console.log(token);
-            res.json({ accessToken: token });
-          }
-        } else {
-          console.log("err");
+        if (rows.length !== 1) {
+          res.status(500).json({ message: "뭔가 이상한데?" });
+          return;
+        }
+
+        const userRow = rows[0];
+        if (bcrypt.compareSync(pw, userRow.user_pw)) {
+          console.log("success");
+          const payload = {
+            tokenId: id,
+            tokenPw: pw,
+          };
+          var token = jwt.sign(payload, process.env.privateKey);
+          console.log(token);
+          res.json({ accessToken: token });
         }
       }
     })
@@ -54,7 +55,7 @@ exports.createAuthRouter = (db) => {
 
       console.log(db);
 
-      const hash = bcrypt.hashSync(pw, saltRounds);
+      const hash = bcrypt.hashSync(pw, SALT_ROUND);
 
       const result = await db.execute(
         `INSERT INTO user (id,user_id,user_pw) VALUES(NULL,? ,?)`,
