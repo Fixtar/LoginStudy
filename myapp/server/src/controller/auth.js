@@ -26,6 +26,7 @@ exports.createAuthRouter = (db) => {
           "SELECT user_pw FROM user WHERE user_id=?",
           [id]
         );
+        console.log(rows);
 
         if (rows.length !== 1) {
           res.status(500).json({ message: "뭔가 이상한데?" });
@@ -39,7 +40,9 @@ exports.createAuthRouter = (db) => {
             tokenId: id,
             tokenPw: pw,
           };
-          var token = jwt.sign(payload, process.env.privateKey);
+          var token = jwt.sign(payload, `${process.env.privateKey}`, {
+            expiresIn: 60 * 60,
+          });
           console.log(token);
           res.json({ accessToken: token });
         }
@@ -53,6 +56,14 @@ exports.createAuthRouter = (db) => {
       const id = req.body.id;
       const pw = req.body.pw;
 
+      const [rows, fields] = await db.execute(
+        "SELECT user_pw FROM user WHERE user_id=?",
+        [id]
+      );
+      if (rows >= 1) {
+        res.status(500).json({ message: "중복된 아이디 입니다." });
+        return;
+      }
       console.log(db);
 
       const hash = bcrypt.hashSync(pw, SALT_ROUND);

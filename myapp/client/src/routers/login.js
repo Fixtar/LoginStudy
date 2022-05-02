@@ -14,7 +14,6 @@ function Login() {
 
     return () => {};
   }, []);
-  const webToken = localStorage.getItem("webToken");
 
   // const Submit = (Account) => {
   //   setUserInfo({ id: Account.id, pw: Account.pw });
@@ -35,17 +34,28 @@ function Login() {
       .then((response) => {
         if (response.data.accessToken) {
           console.log(response.data.accessToken);
-          localStorage.setItem("webToken", response.data.accessToken);
+          localStorage.setItem("accessToken", response.data.accessToken);
         }
       });
   };
 
+  const handleLogout = () => {
+    localStorage.removeItem("accessToken");
+  };
+
+  function RenderLog(props) {
+    const accessToken = localStorage.getItem("accessToken");
+    if (!accessToken) {
+      return <Inputform onSubmit={handleSubmit} Join={handleJoin} />;
+    } else {
+      return <button onClick={handleLogout}>로그아웃</button>;
+    }
+  }
+
   return (
     <div className="App">
       {" "}
-      <Inputform onSubmit={handleSubmit} Join={handleJoin} />
-      <p>id: {userInfo.id}</p>
-      <p>pw: {userInfo.pw}</p>
+      <RenderLog></RenderLog>
     </div>
   );
 }
